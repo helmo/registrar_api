@@ -1,0 +1,7 @@
+; $Id$
+
+name = Registrar API implementation for OpenProvider
+description = Connects to the registrar API of OpenProvider
+package = RegistrarAPI
+depends = registrar_api
+core = 6.x
