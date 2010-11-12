@@ -27,10 +27,11 @@ function registrar_contact_form(&$node, $form_state) {
 	$type = node_get_types('type', $node);
 
 	$form['title'] = array(
-		'#type'		=> 'textfield',
-		'#title'	=> check_plain($type->title_label),
-		'#required'	=> TRUE,
-		'#size'		=> 20,
+		'#type'			=> 'textfield',
+		'#title'		=> check_plain($type->title_label),
+		'#required'		=> TRUE,
+		'#default_value'	=> $node->title,
+		'#size'			=> 20,
 	);
 
 	/* DB schema fields */
@@ -221,8 +222,7 @@ function registrar_api_update($node) {
 /**
  * Implementation of hook_load().
  */
-function registrar_api_load($node) {
-	print_r($node);
+function registrar_contact_load($node) {
 	$contact_data = db_fetch_object(db_query("SELECT * FROM {registrar_api_contact} WHERE nid=%d", $node->nid));
 	return $contact_data; 
 }
