@@ -64,8 +64,7 @@ function _registrar_api_get_set_str($values) {
 
 	$set_arr = array();
 	foreach ($values as $field => $value) {
-		if (in_array($field, array_keys($schema['fields'])) && 
-				!in_array($field, array_keys($schema['primary key']))) {
+		if (in_array($field, array_keys($schema['fields']))) {
 			$set_arr[] = $field . "='" . db_escape_string($value) . "'";
 		}
 	}
