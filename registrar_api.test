@@ -1,0 +1,50 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ *   simpletest tests for the registrar API
+ */
+class RegistrarAPITestCase extends DrupalWebTestCase {
+
+  /**
+   * Implementation of getInfo().
+   */
+  function getInfo() {
+    return array(
+      'name' => t('Registrar API tests'),
+      'description' => t('Registrar API functionality.'),
+      'group' => t('Registrar API'),
+    );
+  }
+
+  /**
+   * 
+   */
+  function setUp() {
+    parent::setUp();
+  }
+
+  function tearDown() {
+    parent::tearDown();
+  }
+
+  function randomDomainName() {
+    $exts = array('.com', '.net', '.org');
+    $ext = $exts[mt_rand(0, count($exts) - 1)];
+    $domain = $this->randomName(12) . $ext;
+    return $domain;
+  }
+
+  function getContacts() {
+    // Use the contact info setup by user 1 for now
+    global $db_prefix;
+    // Reset the db prefix since simpletest changes this, this obviously
+    // won't work for those who actually use a prefix.
+    $tmp = $db_prefix;
+    $db_prefix = '';
+    $contacts = registrar_api_get_user_contacts(1);
+    $db_prefix = $tmp;
+    return $contacts;
+  }
+}
