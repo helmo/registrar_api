@@ -1,0 +1,188 @@
+<?php
+// $Id$
+
+/** 
+ * @file
+ * Contains install and update functions for the registrar_api.
+ */
+
+/**
+ * Implementation of hook_enable().
+ */
+function registrar_api_enable() {
+	drupal_set_message(t('Registrar API module successfully installed. Please review the <a href="@settings">API configuration settings</a>.', array('@settings' => url('admin/settings/registrar_api'))));
+}
+
+/** 
+ * Implementation of hook_install().
+ */
+function registrar_api_install() {
+	drupal_install_schema('registrar_api');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function registrar_api_uninstall() {
+	drupal_uninstall_schema('registrar_api');
+}
+
+function registrar_api_schema() {
+	$schema['registrar_api_contact'] = array(
+		'description' => t("Stores domain contact information"),
+		'fields' => array(
+
+			'cid' => array(
+				'decription'	=> t("Primary key: Contact id"),
+				'type'		=> 'serial',
+			),
+				
+			'nid' => array(
+				'description'	=> t("Node table nid"),
+				'type'		=> 'int',
+				'not null'	=> TRUE,
+			),
+			'company_name' => array(
+				'description'	=> t("Company Name"),
+				'type'		=> 'varchar',
+				'length'	=> 60,
+				'not null'	=> TRUE,
+				'default'	=> '',
+			),
+			'initials' => array(
+				'description'	=> t("Initials"),
+				'type'		=> 'varchar',
+				'length'	=> '60',
+				'not null'	=> TRUE,
+				'default'	=> '',
+			),	
+			'firstname' => array(
+				'description'	=> t("Firstname"),
+				'type'		=> 'varchar',
+				'length'	=> '60',
+				'not null'	=> TRUE,
+				'default'	=> '',
+			),	
+			'nameprefix' => array(
+				'description'	=> t("Name Prefix"),
+				'type'		=> 'varchar',
+				'length'	=> '10',
+				'not null'	=> FALSE,
+				'default'	=> '',
+			),	
+			'lastname' => array(
+				'description'	=> t("Lastname"),
+				'type'		=> 'varchar',
+				'length'	=> '60',
+				'not null'	=> TRUE,
+				'default'	=> '',
+			),	
+			'gender' => array(
+				'description'	=> t("Gender"),
+				'type'		=> 'char',
+				'length'	=> '1',
+				'not null'	=> TRUE,
+				'default'	=> '',
+			),	
+			'street' => array(
+				'description'	=> t("Street"),
+				'type'		=> 'varchar',
+				'length'	=> '60',
+				'not null'	=> TRUE,
+				'default'	=> '',
+			),	
+			'housenumber' => array(
+				'description'	=> t("Housenumber"),
+				'type'		=> 'int',
+				'not null'	=> TRUE,
+				'default'	=> 0,
+			),	
+			'housesuffix' => array(
+				'description'	=> t("Housesuffix"),
+				'type'		=> 'varchar',
+				'length'	=> '30',
+				'not null'	=> FALSE,
+				'default'	=> '',
+			),	
+			'zipcode' => array(
+				'description'	=> t("Zipcode"),
+				'type'		=> 'varchar',
+				'length'	=> '15',
+				'not null'	=> TRUE,
+				'default'	=> '',
+			),	
+			'city' => array(
+				'description'	=> t("City"),
+				'type'		=> 'varchar',
+				'length'	=> '200',
+				'not null'	=> TRUE,
+				'default'	=> '',
+			),	
+			'state' => array(
+				'description'	=> t("State"),
+				'type'		=> 'varchar',
+				'length'	=> '200',
+				'not null'	=> TRUE,
+				'default'	=> '',
+			),	
+			'country' => array(
+				'description'	=> t("Country"),
+				'type'		=> 'varchar',
+				'length'	=> '2',
+				'not null'	=> TRUE,
+				'default'	=> '',
+			),	
+			'phone_countrycode' => array(
+				'description'	=> t("Telephone Country code"),
+				'type'		=> 'int',
+				'not null'	=> TRUE,
+				'default'	=> 0,
+			),	
+			'phone_areacode' => array(
+				'description'	=> t("Telephone Area code"),
+				'type'		=> 'varchar',
+				'length'	=> '10',
+				'not null'	=> TRUE,
+				'default'	=> '',
+			),	
+			'phone_subscribernumber' => array(
+				'description'	=> t("Telephone Subscriber code"),
+				'type'		=> 'varchar',
+				'length'	=> '20',
+				'not null'	=> TRUE,
+				'default'	=> '',
+			),	
+			'fax_countrycode' => array(
+				'description'	=> t("Fax Country code"),
+				'type'		=> 'int',
+				'not null'	=> FALSE,
+				'default'	=> 0,
+			),	
+			'fax_areacode' => array(
+				'description'	=> t("Fax Area code"),
+				'type'		=> 'varchar',
+				'length'	=> '10',
+				'not null'	=> FALSE,
+				'default'	=> '',
+			),	
+			'fax_subscribernumber' => array(
+				'description'	=> t("Fax Subscriber code"),
+				'type'		=> 'varchar',
+				'length'	=> '20',
+				'not null'	=> FALSE,
+				'default'	=> '',
+			),	
+			'email' => array(
+				'description'	=> t("Email address"),
+				'type'		=> 'varchar',
+				'length'	=> '255',
+				'not null'	=> TRUE,
+				'default'	=> '',
+			),	
+		),
+		'primary key'	=> array('cid'),
+		'indexes'	=> array('nid'	=> array('nid')),
+	);
+	
+	return $schema;
+}

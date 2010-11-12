@@ -1,0 +1,348 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * The registrar_api module provides basic API calls
+ * to registrars with available API's
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function registrar_api_help($path, $arg) {
+	switch ($path) {
+		case 'admin/modules#name':
+			return t('Registrar API');
+		case 'admin/modules#description':
+			return t("Connects to various domain registrar API's to allow domain registration and management through Drupal");
+		case 'admin/help#registrar_api':
+			return '<p>' . t("Connects to various domain registrar API's to allow domain registration and management through Drupal") . '</p>';
+	}
+} 
+
+/**
+ * Implementation of hook_init().
+ */
+function registrar_api_init() {
+	module_load_include('inc', 'registrar_api', 'registrar_api.node');
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function registrar_api_perm() {
+	return array('create contacts', 'edit own contacts', 'manage_contacts');
+}
+
+/**
+ * Implementation of hook_access().
+ */
+function registrar_api_access($op, $node, $account) {
+	switch ($op) {
+		case 'create':
+			return user_access('create contacts', $account);
+			break;
+		case 'update':
+			return user_access('edit own contact', $account) && ($account->uid == $node->uid) || user_access('manage contacts', $account);
+			break;
+	}
+}
+
+/**** Private helper functions ****/
+
+/**
+ * This function builds the db query set string for the values that need to be saved for a contact.
+ *
+ * @param $values An obkect or array containing the fields and values to set.
+ * @return an SQL SET string
+ */
+function _registrar_api_get_set_str($values) {
+	$schema = drupal_get_schema('registrar_api_contact');
+	
+	$values = is_object($values) ? (array)$values : $values;
+
+	$set_arr = array();
+	foreach ($values as $field => $value) {
+		if (in_array($field, array_keys($schema['fields'])) && 
+				!in_array($field, array_keys($schema['primary key']))) {
+			$set_arr[] = $field . "='" . db_escape_string($value) . "'";
+		}
+	}
+	return implode(", ", $set_arr);
+}
+
+/**
+ * Returns an array of (country code, country) pairs.
+ */
+function _registrar_api_country_codes() {
+  return array(
+    'AF' => t('Afghanistan'),
+    'AL' => t('Albania'),
+    'DZ' => t('Algeria'),
+    'AS' => t('American Samoa'),
+    'AD' => t('Andorra'),
+    'AO' => t('Angola'),
+    'AI' => t('Anguilla'),
+    'AQ' => t('Antarctica'),
+
+    'AG' => t('Antigua and Barbuda'),
+    'AR' => t('Argentina'),
+    'AM' => t('Armenia'),
+    'AW' => t('Aruba'),
+    'AU' => t('Australia'),
+    'AT' => t('Austria'),
+    'AZ' => t('Azerbaijan'),
+    'BS' => t('Bahamas'),
+    'BH' => t('Bahrain'),
+
+    'BD' => t('Bangladesh'),
+    'BB' => t('Barbados'),
+    'BY' => t('Belarus'),
+    'BE' => t('Belgium'),
+    'BZ' => t('Belize'),
+    'BJ' => t('Benin'),
+    'BM' => t('Bermuda'),
+    'BT' => t('Bhutan'),
+    'BO' => t('Bolivia'),
+
+    'BA' => t('Bosnia and Herzegovina'),
+    'BW' => t('Botswana'),
+    'BV' => t('Bouvet Island'),
+    'BR' => t('Brazil'),
+    'BN' => t('Brunei Darussalam'),
+    'BG' => t('Bulgaria'),
+    'BF' => t('Burkina Faso'),
+    'BI' => t('Burundi'),
+    'KH' => t('Cambodia'),
+
+    'CM' => t('Cameroon'),
+    'CA' => t('Canada'),
+    'CV' => t('Cape Verde'),
+    'KY' => t('Cayman Islands'),
+    'CF' => t('Central African Republic'),
+    'TD' => t('Chad'),
+    'CL' => t('Chile'),
+    'CN' => t('China'),
+    'CX' => t('Christmas Island'),
+
+    'CC' => t('Cocos (Keeling) Islands'),
+    'CO' => t('Colombia'),
+    'KM' => t('Comoros'),
+    'CG' => t('Congo'),
+    'CK' => t('Cook Islands'),
+    'CR' => t('Costa Rica'),
+    'CI' => t('Cote D\'Ivoire'),
+    'HR' => t('Croatia (Hrvatska)'),
+    'CU' => t('Cuba'),
+
+    'CY' => t('Cyprus'),
+    'CZ' => t('Czech Republic'),
+    'CS' => t('Czechoslovakia'),
+    'DK' => t('Denmark'),
+    'DJ' => t('Djibouti'),
+    'DM' => t('Dominica'),
+    'DO' => t('Dominican Republic'),
+    'TP' => t('East Timor'),
+    'EC' => t('Ecuador'),
+
+    'EG' => t('Egypt'),
+    'SV' => t('El Salvador'),
+    'GQ' => t('Equatorial Guinea'),
+    'ER' => t('Eritrea'),
+    'EE' => t('Estonia'),
+    'ET' => t('Ethiopia'),
+    'FK' => t('Falkland Islands'),
+    'FO' => t('Faroe Islands'),
+    'FJ' => t('Fiji'),
+
+    'FI' => t('Finland'),
+    'FR' => t('France'),
+    'FX' => t('France, Metropolitan'),
+    'GF' => t('French Guiana'),
+    'PF' => t('French Polynesia'),
+    'TF' => t('French S Territories'),
+    'GA' => t('Gabon'),
+    'GM' => t('Gambia'),
+    'GE' => t('Georgia'),
+
+    'DE' => t('German'),
+    'GH' => t('Ghana'),
+    'GI' => t('Gibraltar'),
+    'GB' => t('Great Britain (UK)'),
+    'GR' => t('Greece'),
+    'GL' => t('Greenland'),
+    'GD' => t('Grenada'),
+    'GP' => t('Guadeloupe'),
+    'GU' => t('Guam'),
+
+    'GT' => t('Guatemala'),
+    'GN' => t('Guinea'),
+    'GW' => t('Guinea-Bissau'),
+    'GY' => t('Guyana'),
+    'HT' => t('Haiti'),
+    'HM' => t('Heard and McDonald Isls'),
+    'HN' => t('Honduras'),
+    'HK' => t('Hong Kong'),
+    'HU' => t('Hungary'),
+
+    'IS' => t('Iceland'),
+    'IN' => t('India'),
+    'ID' => t('Indonesia'),
+    'IR' => t('Iran'),
+    'IQ' => t('Iraq'),
+    'IE' => t('Ireland'),
+    'IL' => t('Israel'),
+    'IT' => t('Italy'),
+    'JM' => t('Jamaica'),
+
+    'JP' => t('Japan'),
+    'JO' => t('Jordan'),
+    'KZ' => t('Kazakhstan'),
+    'KE' => t('Kenya'),
+    'KI' => t('Kiribati'),
+    'KP' => t('Korea (North)'),
+    'KR' => t('Korea (South)'),
+    'KW' => t('Kuwait'),
+    'KG' => t('Kyrgyzstan'),
+
+    'LA' => t('Laos'),
+    'LV' => t('Latvia'),
+    'LB' => t('Lebanon'),
+    'LS' => t('Lesotho'),
+    'LR' => t('Liberia'),
+    'LY' => t('Libya'),
+    'LI' => t('Liechtenstein'),
+    'LT' => t('Lithuania'),
+    'LU' => t('Luxembourg'),
+
+    'MO' => t('Macau'),
+    'MK' => t('Macedonia'),
+    'MG' => t('Madagascar'),
+    'MW' => t('Malawi'),
+    'MY' => t('Malaysia'),
+    'MV' => t('Maldives'),
+    'ML' => t('Mali'),
+    'MT' => t('Malta'),
+    'MH' => t('Marshall Islands'),
+
+    'MQ' => t('Martinique'),
+    'MR' => t('Mauritania'),
+    'MU' => t('Mauritius'),
+    'YT' => t('Mayotte'),
+    'MX' => t('Mexico'),
+    'FM' => t('Micronesia'),
+    'MD' => t('Moldova'),
+    'MC' => t('Monaco'),
+    'MN' => t('Mongolia'),
+
+    'ME' => t('Montenegro'),
+    'MS' => t('Montserrat'),
+    'MA' => t('Morocco'),
+    'MZ' => t('Mozambique'),
+    'MM' => t('Myanmar'),
+    'NA' => t('Namibia'),
+    'NR' => t('Nauru'),
+    'NP' => t('Nepal'),
+    'NL' => t('Netherlands'),
+
+    'AN' => t('Netherlands Antilles'),
+    'NT' => t('Neutral Zone'),
+    'NC' => t('New Caledonia'),
+    'NZ' => t('New Zealand'),
+    'NI' => t('Nicaragua'),
+    'NE' => t('Niger'),
+    'NG' => t('Nigeria'),
+    'NU' => t('Niue'),
+    'NF' => t('Norfolk Island'),
+
+    'MP' => t('Northern Mariana Isls'),
+    'NO' => t('Norway'),
+    'OM' => t('Oman'),
+    'PK' => t('Pakistan'),
+    'PW' => t('Palau'),
+    'PA' => t('Panama'),
+    'PG' => t('Papua New Guinea'),
+    'PY' => t('Paraguay'),
+    'PE' => t('Peru'),
+
+    'PH' => t('Philippines'),
+    'PN' => t('Pitcairn'),
+    'PL' => t('Poland'),
+    'PT' => t('Portugal'),
+    'PR' => t('Puerto Rico'),
+    'QA' => t('Qatar'),
+    'RE' => t('Reunion'),
+    'RO' => t('Romania'),
+    'RU' => t('Russian Federation'),
+
+    'RW' => t('Rwanda'),
+    'KN' => t('Saint Kitts and Nevis'),
+    'LC' => t('Saint Lucia'),
+    'WS' => t('Samoa'),
+    'SM' => t('San Marino'),
+    'ST' => t('Sao Tome and Principe'),
+    'SA' => t('Saudi Arabia'),
+    'SN' => t('Senegal'),
+    'SC' => t('Seychelles'),
+
+    'SL' => t('Sierra Leone'),
+    'SG' => t('Singapore'),
+    'SK' => t('Slovak Republic'),
+    'SI' => t('Slovenia'),
+    'Sb' => t('Solomon Islands'),
+    'SO' => t('Somalia'),
+    'ZA' => t('South Africa'),
+    'ES' => t('Spain'),
+    'LK' => t('Sri Lanka'),
+
+    'VC' => t('St Vincent'),
+    'SH' => t('St. Helena'),
+    'PM' => t('St. Pierre and Miquelon'),
+    'SD' => t('Sudan'),
+    'SR' => t('Suriname'),
+    'SZ' => t('Swaziland'),
+    'SE' => t('Sweden'),
+    'CH' => t('Switzerland'),
+    'SY' => t('Syria'),
+
+    'TW' => t('Taiwan'),
+    'TJ' => t('Tajikistan'),
+    'TZ' => t('Tanzania'),
+    'TH' => t('Thailand'),
+    'TG' => t('Togo'),
+    'TK' => t('Tokelau'),
+    'TO' => t('Tonga'),
+    'TT' => t('Trinidad and Tobago'),
+    'TN' => t('Tunisia'),
+
+    'TR' => t('Turkey'),
+    'TM' => t('Turkmenistan'),
+    'TC' => t('Turks and Caicos Islands'),
+    'TV' => t('Tuvalu'),
+    'UG' => t('Uganda'),
+    'UA' => t('Ukraine'),
+    'AE' => t('United Arab Emirates'),
+    'UK' => t('United Kingdom'),
+    'US' => t('United States'),
+
+    'UY' => t('Uruguay'),
+    'UM' => t('US Minor Outlying Isls'),
+    'SU' => t('USSR (former)'),
+    'UZ' => t('Uzbekistan'),
+    'VU' => t('Vanuatu'),
+    'VA' => t('Vatican City St'),
+    'VE' => t('Venezuela'),
+    'VN' => t('Viet Nam'),
+    'VG' => t('Virgin Islands (British)'),
+
+    'VI' => t('Virgin Islands (U.S.)'),
+    'WF' => t('Wallis and Futuna Isls'),
+    'EH' => t('Western Sahara'),
+    'YE' => t('Yemen'),
+    'YU' => t('Yugoslavia'),
+    'ZR' => t('Zaire'),
+    'ZM' => t('Zambia'),
+    'ZW' => t('Zimbabwe'),
+  );
+}
