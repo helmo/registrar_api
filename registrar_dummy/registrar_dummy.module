@@ -10,3 +10,21 @@ function registrar_dummy_get_registrar_info() {
   );
 }
 
+function registrar_dummy_admin_form() {
+  $form = array();
+
+  $form['registrar_dummy'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Dummy Registrar Settings'),
+  );
+
+  $form['registrar_dummy']['registrar_dummy_uri'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Dummy Service URL'),
+    '#default_value' => variable_get('registrar_dummy_uri', ''),
+    '#description' => t("i.e. https://api.registrar_dummy.com/"),
+    '#required' => TRUE,
+  );
+
+  return $form;
+}

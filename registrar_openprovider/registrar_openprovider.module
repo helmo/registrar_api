@@ -1,0 +1,46 @@
+<?php
+
+function registrar_openprovider_get_registrar_info() {
+
+  return array(
+    'registrar_openprovider' => array(
+      'name' => 'OpenProvider',
+      'description' => 'Openprovider domain registrar',
+    )
+  );
+}
+
+function registrar_openprovider_admin_form() {
+  $form = array();
+
+  $form['registrar_openprovider'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('OpenProvider Registrar Settings'),
+  );
+
+  $form['registrar_openprovider']['registrar_openprovider_uri'] = array(
+    '#type' => 'textfield',
+    '#title' => t('OpenProvider Service URL'),
+    '#default_value' => variable_get('registrar_openprovider_uri', 'https://api.openprovider.eu/'),
+    '#description' => t("i.e. https://api.openprovider.eu/"),
+    '#required' => TRUE,
+  );
+
+  $form['registrar_openprovider']['registrar_openprovider_api_user'] = array(
+    '#type' => 'textfield',
+    '#title' => t('OpenProvider API User'),
+    '#default_value' => variable_get('registrar_openprovider_api_user', ''),
+    '#description' => t("This is usually your regular openprovider username"),
+    '#required' => TRUE,
+  );
+
+  $form['registrar_openprovider']['registrar_openprovider_api_password'] = array(
+    '#type' => 'textfield',
+    '#title' => t('OpenProvider Password'),
+    '#default_value' => variable_get('registrar_openprovider_api_password', ''),
+    '#required' => TRUE,
+  );
+
+  return system_settings_form($form);
+}
+
