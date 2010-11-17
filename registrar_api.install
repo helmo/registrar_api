@@ -184,5 +184,47 @@ function registrar_api_schema() {
 		'indexes'	=> array('nid'	=> array('nid')),
 	);
 	
+
+	$schema['registrar_api_user_handles'] = array(
+		'description' => t("Maps contact handles to users"),
+		'fields' => array(
+			'cid' => array(
+				'description'	=> t("Contact Id"),
+				'type'		=> 'int',
+				'not null'	=> TRUE,
+			),
+			'uid' => array(
+				'description'	=> t("User table uid"),
+				'type'		=> 'int',
+				'not null'	=> TRUE,
+			),
+		),
+		'indexes'	=> array('uid'	=> array('uid'), 'cid' => array('cid')),
+	);
+	
+	$schema['registrar_api_remote_handles' = array(
+		'description'	=> t("Maps remote handles to internal handles"),
+		'fields'	=> array(
+			'cid'	=> array(
+				'description'	=> t("Contact"),
+				'type'		=> 'int',
+				'not null'	=> TRUE,
+			),
+			'remote_handle'	=> array(
+				'description'	=> t("Remote handle"),
+				'type'		=> 'varchar',
+				'length'	=> '60',
+				'not null'	=> TRUE,
+			),
+			'registrar' => array(
+				'description'	=> t("Registrar"),
+				'type'		=> 'varchar',
+				'length'	=> '100',
+				'not null'	=> TRUE
+			),
+		),
+		'indexes'	=> array( 'cid' => array('cid'), 'remote_handle' => array('remote_handle')),
+	);
+				
 	return $schema;
 }
