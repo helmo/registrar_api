@@ -1,0 +1,75 @@
+<?php
+// $Id$
+
+define('OPENPROVIDER_TEST_URL', 'https://api.openprovider.eu');
+define('OPENPROVIDER_TEST_KEY', '');
+define('OPENPROVIDER_TEST_USER', '');
+
+/**
+ * @file
+ *   simpletest tests for the registrar API - OpenProvider specific
+ */
+class OpenProviderAPITestCase extends RegistrarAPITestCase {
+
+  /**
+   * Implementation of getInfo().
+   */
+  function getInfo() {
+    return array(
+      'name' => t('OpenProvider API tests'),
+      'description' => t('Test openprovider.eu API calls.'),
+      'group' => t('Registrar API'),
+    );
+  }
+
+
+  /**
+   * Test domains_register
+   */
+  function testOpenProviderAPICheckDomains() {
+    // Test a registered name
+    $actual = openprovider_check_domains('openprovider.com');
+    $desired = array(
+      'openprovider.eu' => array(
+        'Domain' => 'openprovider.eu',
+        'Available' => 'false',
+        'ErrorNo' => '',
+        'Description' => '',
+      )
+    );
+
+    $this->assertEqual($actual, $desired, t('Testing check_domains on a registered domain name'));
+
+    // Test on an available domain
+    $actual = openprovider_check_domains('thisisnotregdyet.com');
+    $desired = array(
+      'thisisnotregdyet.com' => array(
+        'Domain' => 'thisisnotregdyet.com',
+        'Available' => 'true',
+        'ErrorNo' => '',
+        'Description' => '',
+      ),
+    );
+
+    $this->assertEqual($actual, $desired, t('Testing check_domains on an available domain name'));
+  }
+
+  function testOpenProviderAPICreateDomain() {
+    $domain = $this->randomDomainName();
+    $contacts = $this->getContacts();
+    $contacts = _registrar_api_convert_contacts($contacts['registrant'], $contacts['tech'], $contacts['admin'], $contacts['aux_billing']);
+
+    $actual = openprovider_create_domain($domain, 1, $contacts['registrant'], $contacts['tech'], $contacts['admin'], $contacts['auxbilling']);
+
+    $desired = array(
+      'Domain' => $domain,
+      'DomainID' => $actual['DomainID'],  // No way to guess some of these.
+      'Registered' => 'true',
+      'OrderId' => $actual['OrderID'],
+      'TransactionId' => $actual['TransactionID'],
+      'ChargedAmount' => $actual['ChargedAmount'],
+    );
+
+    $this->assertEqual($actual, $desired, t('Testing domain creation on %domain', array('%domain' => $domain)));
+  }
+}

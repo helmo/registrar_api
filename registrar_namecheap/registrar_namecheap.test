@@ -1,0 +1,85 @@
+<?php
+// $Id$
+
+define('NAMECHEAP_TEST_URL', 'https://api.sandbox.namecheap.com/xml.response');
+define('NAMECHEAP_TEST_KEY', '');
+define('NAMECHEAP_TEST_USER', '');
+
+/**
+ * @file
+ *   simpletest tests for the registrar API
+ */
+class NamecheapAPITestCase extends RegistrarAPITestCase {
+
+  /**
+   * Implementation of getInfo().
+   */
+  function getInfo() {
+    return array(
+      'name' => t('Namecheap API tests'),
+      'description' => t('Test Namecheap.com API calls.'),
+      'group' => t('Registrar API'),
+    );
+  }
+
+  /**
+   * Set the namecheap api settings
+   */
+  function setUp() {
+    parent::setUp();
+
+    variable_set('namecheap_uri', NAMECHEAP_TEST_URL);
+    variable_set('namecheap_api_key', NAMECHEAP_TEST_KEY);
+    variable_set('namecheap_api_user', NAMECHEAP_TEST_USER);
+  }
+
+  /**
+   * Test domains_register
+   */
+  function testNamecheapAPICheckDomains() {
+    // Test an a registered name
+    $actual = namecheap_check_domains('namecheap.com');
+    $desired = array(
+      'namecheap.com' => array(
+        'Domain' => 'namecheap.com',
+        'Available' => 'false',
+        'ErrorNo' => '',
+        'Description' => '',
+      )
+    );
+
+    $this->assertEqual($actual, $desired, t('Testing check_domains on a registered domain name'));
+
+    // Test on an available domain
+    $actual = namecheap_check_domains('thisisnotregdyet.com');
+    $desired = array(
+      'thisisnotregdyet.com' => array(
+        'Domain' => 'thisisnotregdyet.com',
+        'Available' => 'true',
+        'ErrorNo' => '',
+        'Description' => '',
+      ),
+    );
+
+    $this->assertEqual($actual, $desired, t('Testing check_domains on an available domain name'));
+  }
+
+  function testNamecheapAPICreateDomain() {
+    $domain = $this->randomDomainName();
+    $contacts = $this->getContacts();
+    $contacts = _registrar_api_convert_contacts($contacts['registrant'], $contacts['tech'], $contacts['admin'], $contacts['aux_billing']);
+
+    $actual = namecheap_create_domain($domain, 1, $contacts['registrant'], $contacts['tech'], $contacts['admin'], $contacts['auxbilling']);
+
+    $desired = array(
+      'Domain' => $domain,
+      'DomainID' => $actual['DomainID'],  // No way to guess some of these.
+      'Registered' => 'true',
+      'OrderId' => $actual['OrderID'],
+      'TransactionId' => $actual['TransactionID'],
+      'ChargedAmount' => $actual['ChargedAmount'],
+    );
+
+    $this->assertEqual($actual, $desired, t('Testing domain creation on %domain', array('%domain' => $domain)));
+  }
+}
