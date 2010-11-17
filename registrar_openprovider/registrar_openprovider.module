@@ -10,6 +10,10 @@ function registrar_openprovider_get_registrar_info() {
   );
 }
 
+function registrar_openprovider_include() {
+  module_load_include('php', 'registrar_openprovider', 'API');
+}
+
 function registrar_openprovider_admin_form() {
   $form = array();
 
@@ -44,3 +48,86 @@ function registrar_openprovider_admin_form() {
   return system_settings_form($form);
 }
 
+function registrar_openprovider_create_handle($contact) {
+  registrar_openprovider_include();
+  $request = _registrar_openprovider_new_request('createCustomerRequest');
+  $args_data = _registrar_openprovider_node_to_args_data($contact);
+  $request->setArgs($args_data);
+  $reply = _registrar_openprovider_do_request($request);
+
+  if ($reply->getFaultCode() == 0) {
+    $response = $reply->getValue();
+    $handle = $response['handle'];
+    $contact->remote_handles['registrar_openprovider'] = $handle;
+    dsm($handle);
+  }
+  else {
+    echo "Code: " . $reply->getFaultCode() . "\n";
+    echo "Error: " . $reply->getFaultString() . "\n";
+    echo "\n---------------------------------------\n";
+  }
+
+  return $handle;
+}
+
+function _registrar_openprovider_do_request($request) {
+  // Create a new API connection
+  $api = new OP_API (variable_get('registrar_openprovider_uri', 'https://api.openprovider.eu/'));
+  $request->setAuth(array(
+    'username' => variable_get('registrar_openprovider_api_user', ''), 
+    'password' => variable_get('registrar_openprovider_api_password', ''),
+  ));
+  $reply = $api->setDebug(1)->process($request);
+
+  return $reply;
+}
+function _registrar_openprovider_new_request($request_name) {
+  $request = new OP_Request;
+  $request->setCommand($request_name)
+
+  return $request;
+}
+
+/**
+ * Create an array of contact data for OpenProvider from a contact node
+ */
+function _registrar_openprovider_node_to_args_data($contact_node) {
+  $n = $contact_node;
+  // Prepare arguments array
+  $args_data = array(
+    'companyName' => $n->company_name, //'Company Ltd',
+    'name' => array(
+      'initials' => $n->initials, //'J.A.',
+      'firstName' => $n->firstname, //'John',
+      'prefix' => $n->nameprefix, //"",
+      'lastName' => $n->lastname, //'Jones',
+    ),
+    'vat' => null,
+    'gender' => $n->gender, //'M', 
+    'phone' => array(
+                'countryCode'  => $n->phone_countrycode,
+                'areaCode' => $n->phone_areacode,
+                'subscriberNumber' => $n->phone_subscribernumber,
+            ),
+    'address' => array(
+      'street' => $n->street, //'Main Avenue',
+      'number' => $n->housenumber, //'2',
+      'suffix' => $n->housesuffix, //'a',
+      'zipcode' => $n->zipcode, //'8817 AB',
+      'city' => $n->city, //'Rotterdam',
+      'state' => $n->state,
+      'country' => $n->country,
+    ),
+
+    'email' => $n->email, // 'not@existing.com',
+/*
+            'additionalData' => array(
+                'birthDate' => '1958-12-03',
+                'companyRegistrationCity' => 'London',
+                'companyRegistrationNumber' => '7723601',
+                'companyRegistrationSubscriptionDate' => '2003-09-12',
+            )
+ */
+  );
+  return $args_data;
+}

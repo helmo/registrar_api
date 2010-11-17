@@ -28,3 +28,13 @@ function registrar_dummy_admin_form() {
 
   return $form;
 }
+
+/**
+ * Create a remote handle for a set of contact details.
+ * @param object
+ *   A contact node object
+ * @return A handle
+ */
+function registrar_dummy_create_handle($contact) {
+  return 'AAA';
+}
