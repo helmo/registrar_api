@@ -47,6 +47,7 @@ function registrar_contact_form(&$node, $form_state) {
 		'#required'		=> TRUE,
 		'#size'			=> 60,
 		'#maxlength'		=> 60,
+		'#autocomplete_path'	=> 'registrar/company/autocomplete',
 		'#default_value'	=> $node->company_name,
 	);
 	$form['initials'] = array(

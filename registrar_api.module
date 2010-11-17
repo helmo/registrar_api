@@ -32,6 +32,13 @@ function registrar_api_init() {
  * Implementation of hook_menu().
  */
 function registrar_api_menu() {
+	$items['registrar/company/autocomplete'] = array(
+		'title'			=> 'Company name autocomplete',
+		'page callback'		=> 'registrar_api_company_autocomplete',
+		'access arguments'	=> array("create registrar_contact content"),
+		'type'			=> MENU_CALLBACK,
+		'file'			=> 'autocomplete.inc',
+	);
 	$items['user/%user/registrar_contacts'] = array(
 		'title'			=> t('Registrar Contacts'),
 		'page callback'		=> 'registrar_api_user_page',
