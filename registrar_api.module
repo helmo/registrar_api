@@ -48,7 +48,27 @@ function registrar_api_menu() {
 		'type'			=> MENU_LOCAL_TASK,
 		'weight'		=> 2,
 	);
-	return $items;
+  $items['admin/settings/registrar_api'] = array(
+    'title' => 'Registrar API Settings',
+    'description' => 'Manage the registrar API settings',
+      'page callback' => 'drupal_get_form',
+    'page arguments' => array('registrar_api_admin_form'),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $registrars = registrar_api_get_registars();
+  foreach ($registrars as $rname => $v) {
+    $items['admin/settings/registrar_api/' . $rname] = array(
+      'title' => $v['name'],
+      'description' => $v['name'] . 'Manage the registrar API settings',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array($rname . '_admin_form'),
+      'access arguments' => array('access administration pages'),
+      'type' => MENU_LOCAL_TASK,
+    );
+
+  }
+  return $items;
 }
 
 /**
@@ -86,6 +106,37 @@ function registrar_api_user($op, &$edit, &$account, $category = NULL) {
 			}	
 			break;
 	}
+}
+
+/**
+ * Callback function for the registrar_api admin settings form
+ */
+function registrar_api_admin_form($arg) {
+
+  $form = array();
+  $registrars = registrar_api_get_registars();
+  dsm($registrars);
+  dsm($arg);
+
+  foreach($registrars as $k => $v) {
+    $registrars_list[$k] = $v['name'];
+  }
+  $default_registrar = variable_get('registrar_api_default_registrar', '');
+  $form['registrar_api']['registrar_api_default_registrar'] = array(
+    '#type' => 'select',
+    '#title' => t('Select the registrar API to use by default'),
+    '#default_value' => $default_registrar,
+    '#options' => $registrars_list,
+  );
+
+  return system_settings_form($form);
+}
+/**
+ * Provide a list of all available registrars
+ */ 
+function registrar_api_get_registars() {
+
+  return module_invoke_all('get_registrar_info');
 }
 
 /**** Pages ****/
