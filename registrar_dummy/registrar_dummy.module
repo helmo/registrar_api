@@ -1,0 +1,12 @@
+<?php
+
+function registrar_dummy_get_registrar_info() {
+
+  return array(
+    'registrar_dummy' => array(
+      'name' => 'Dummy',
+      'description' => 'Dummy domain registrar',
+    )
+  );
+}
+
