@@ -226,5 +226,37 @@ function registrar_api_schema() {
 		'indexes'	=> array( 'cid' => array('cid'), 'remote_handle' => array('remote_handle')),
 	);
 				
+	$schema['registrar_api_domain'] = array(
+		'description'	=> t("Domains"),
+		'fields'	=> array(
+			'nid' => array(
+                                'description'   => t("Node table nid"),
+                                'type'          => 'int',
+                                'not null'      => TRUE,
+                        ),
+			'tld' => array(
+				'description'	=> t("Top level domain"),
+				'type'		=> 'varchar',
+				'length'	=> '10',
+				'not null'	=> TRUE,
+			),
+			'registrar_handle'	=> array(
+				'description'	=> t("Registrar handle"),
+				'type'		=> 'int',
+				'not null'	=> TRUE,
+			),
+			'adm_handle'	=> array(
+				'description'	=> t("Administrative handle"),
+				'type'		=> 'int',
+				'not null'	=> TRUE,
+			),
+			'tech_handle'	=> array(
+				'description'	=> t("Technical handle"),
+				'type'		=> 'int',
+				'not null'	=> TRUE,
+			),
+		),
+		'indexes'	=> array( 'nid' => array('nid')),
+	);
 	return $schema;
 }

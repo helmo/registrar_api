@@ -39,6 +39,13 @@ function registrar_api_menu() {
 		'type'			=> MENU_CALLBACK,
 		'file'			=> 'autocomplete.inc',
 	);
+	$items['registrar/handle/autocomplete'] = array(
+		'title'			=> 'Handle autocomplete',
+		'page callback'		=> 'registrar_api_handle_autocomplete',
+		'access arguments'	=> array("create registrar_contact content"),
+		'type'			=> MENU_CALLBACK,
+		'file'			=> 'autocomplete.inc',
+	);
 	$items['user/%user/registrar_contacts'] = array(
 		'title'			=> t('Registrar Contacts'),
 		'page callback'		=> 'registrar_api_user_page',
@@ -54,7 +61,7 @@ function registrar_api_menu() {
       'page callback' => 'drupal_get_form',
     'page arguments' => array('registrar_api_admin_form'),
     'access arguments' => array('access administration pages'),
-    'type' => MENU_NORMAL_ITEM,
+    'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $registrars = registrar_api_get_registars();
   foreach ($registrars as $rname => $v) {
@@ -142,12 +149,19 @@ function registrar_api_get_registars() {
 /**** Pages ****/
 
 function registrar_api_user_page($user) {
-	$result = db_query("SELECT * FROM {registrar_api_user_handles} handles LEFT JOIN {registrar_api_contact} contact ON (handles.cid = contact.cid)  WHERE  handles.uid = %d", $user->uid);
+	$result = db_query("
+		SELECT * FROM {registrar_api_user_handles} handles 
+			LEFT JOIN {registrar_api_contact} contact 
+			ON (handles.cid = contact.cid)
+				LEFT JOIN {node} node 
+					ON (contact.nid = node.nid)
+		WHERE  handles.uid = %d", $user->uid);
 	$data = "";
-	$table_header = array( 'Contact name', 'Company'); 
+	$table_header = array('Handle', 'Contact name', 'Company'); 
 	$table_data = array();
 	while ($contact = db_fetch_object($result)) {
-		$table_data[] = array(_registrar_api_full_contact_name($contact), $contact->company_name);
+		$attr = array( 'title' => _registrar_api_format_contact_info($contact));
+		$table_data[] = array(l($contact->title, 'node/' . $contact->nid, array( 'attributes' => $attr) ), _registrar_api_full_contact_name($contact), $contact->company_name );
 	}
 	return theme_table($table_header,$table_data);
 }
@@ -181,6 +195,13 @@ function _registrar_api_full_contact_name($contact) {
 	return $contact->lastname . ", " . $contact->nameprefix . " " . $contact->initials . " (" . $contact->firstname . ")";
 }	
 
+function _registrar_api_format_contact_info($contact, $html = FALSE) {
+	$data = _registrar_api_full_contact_name($contact) . ($html ? "<br/>" : "\n");
+	$data .= $contact->company_name . ($html ? "<br/>" : "\n");
+	$data .= $contact->street . " " . $contact->housenumber . " " . $contact->housesuffix . ($html ? "<br/>" : "\n");
+	$data .= $contact->city . ", " . $contact->zipcode;
+	return $data;
+}
 function _registrar_api_user_tab_access($account) {
 	global $user;
 

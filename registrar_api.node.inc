@@ -17,6 +17,13 @@ function registrar_api_node_info() {
 			'description'	=> 'A contact handle representing a contact',
 			'has_body'	=> FALSE,
 		),
+		'registrar_api_domain' => array(
+			'name'		=> t('Domain'),
+			'module'	=> 'registrar_api_domain',
+			'description'	=> 'A domain name',
+			'title_label'	=> t('Domain'),
+			'has_body'	=> FALSE,
+		),
 	);
 }
 
@@ -202,6 +209,55 @@ function registrar_contact_form(&$node, $form_state) {
 	return $form;
 }
 
+function registrar_api_domain_form(&$node, $form_state) {
+
+	$type = node_get_types('type', $node);
+
+	/* DB schema fields */
+        $form['title'] = array(
+                '#type'                 => 'textfield',
+                '#title'                => check_plain($type->title_label),
+                '#required'             => TRUE,
+                '#default_value'        => $node->title,
+                '#size'                 => 20,
+        );
+
+	$form['tld'] = array(
+		'#type'			=> 'textfield',
+		'#title'		=> t('Top level domain'),
+		'#required'		=> TRUE,
+		'#default_value'	=> $node->tld,
+	);
+	$form['registrar_handle'] = array(
+		'#type'			=> 'textfield',
+		'#title'		=> t('Registrar handle'),
+		'#required'		=> TRUE,
+		'#size'			=> 60,
+		'#autocomplete_path'	=> 'registrar/handle/autocomplete',
+		'#maxlength'		=> 60,
+		'#default_value'	=> $node->registrar_handle,
+	);
+	$form['adm_handle'] = array(
+		'#type'			=> 'textfield',
+		'#title'		=> t('Administrative handle'),
+		'#required'		=> TRUE,
+		'#size'			=> 60,
+		'#autocomplete_path'	=> 'registrar/handle/autocomplete',
+		'#maxlength'		=> 60,
+		'#default_value'	=> $node->adm_handle,
+	);
+	$form['tech_handle'] = array(
+		'#type'			=> 'textfield',
+		'#title'		=> t('Technical handle'),
+		'#required'		=> TRUE,
+		'#size'			=> 60,
+		'#autocomplete_path'	=> 'registrar/handle/autocomplete',
+		'#maxlength'		=> 60,
+		'#default_value'	=> $node->tech_handle,
+	);
+	return $form;
+}
+
 /**
  * Implementation of hook_insert().
  */
@@ -215,13 +271,43 @@ function registrar_contact_insert($node) {
 	db_query("INSERT INTO {registrar_api_user_handles} SET cid=%d, uid=%d", $cid, $node->uid);
 } 
 
+function registrar_api_domain_insert($node) {
+	db_query("INSERT INTO {registrar_api_domain} SET nid='%d', tld='%s', registrar_handle='%d', adm_handle='%d', tech_handle='%d'", $node->nid, $node->tld, $node->registrar_handle, $node->adm_handle, $node->tech_handle);
+}
+
 /**
  * Implementation of hook_update().
  */
 function registrar_api_update($node) {
-	print_r($node);
+	// TODO: module_invoke_all('update_contact', $node);
+
+	//print_r($node);
 	//stub
 }
+
+function registrar_api_domain_update($node) {
+	// TODO 
+}
+
+/**
+ * Implementation of hook_view().
+ */
+function registrar_contact_view($node, $teaser = FALSE, $page = FALSE) {
+	$node->content['Contact'] = array(
+		'#value' 	=> _registrar_api_format_contact_info($node, TRUE),
+		'#weight'	=> 1,
+	);
+	return $node;
+}
+
+function registrar_api_domain_view($node, $teaser = FALSE, $page = FALSE) {
+	$node->content['Domain'] = array(
+		'#value'	=> $node->title,
+		'#weight'	=> 1,
+	);
+	return $node;
+}
+
 
 /**
  * Implementation of hook_load().
@@ -229,6 +315,11 @@ function registrar_api_update($node) {
 function registrar_contact_load($node) {
 	$contact_data = db_fetch_object(db_query("SELECT * FROM {registrar_api_contact} WHERE nid=%d", $node->nid));
 	return $contact_data; 
+}
+
+function registrar_api_domain_load($node) {
+	$domain_data = db_fetch_object(db_query("SELECT * FROM {registrar_api_domain} WHERE nid=%d", $node->nid));
+	return $domain_data;
 }
 
 /**
@@ -241,7 +332,7 @@ function registrar_contact_load($node) {
  * Implementation of hook_form_alter().
  */
 function registrar_api_form_alter(&$form, $form_state, $form_id) {
-	if ($form_id == 'registrar_contact_node_form') {
+	if ($form_id == 'registrar_contact_node_form' || $form_id == 'registrar_api_domain_node_form') {
 		// Move menu to the bottom
 		$form['menu']['#weight'] = 5;
 		
