@@ -202,7 +202,7 @@ function registrar_api_schema() {
 		'indexes'	=> array('uid'	=> array('uid'), 'cid' => array('cid')),
 	);
 	
-	$schema['registrar_api_remote_handles' = array(
+	$schema['registrar_api_remote_handles'] = array(
 		'description'	=> t("Maps remote handles to internal handles"),
 		'fields'	=> array(
 			'cid'	=> array(
