@@ -206,9 +206,12 @@ function registrar_contact_form(&$node, $form_state) {
  */
 function registrar_contact_insert($node) {
 	//stub	
+//	print_r($node);
 	$set_str = _registrar_api_get_set_str($node);
 	db_query("INSERT INTO {registrar_api_contact} SET $set_str",
 		$node->nid);
+	$cid = db_last_insert_id('registrar_api_contact', 'cid');
+	db_query("INSERT INTO {registrar_api_user_handles} SET cid=%d, uid=%d", $cid, $node->uid);
 } 
 
 /**
