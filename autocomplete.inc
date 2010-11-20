@@ -19,7 +19,7 @@ function registrar_api_handle_autocomplete($string = "") {
 	$matches = array();
 	global $user;
 	$result = db_query("
-		SELECT node.title, node.nid FROM {registrar_api_contact} contact
+		SELECT node.title, node.nid, contact.* FROM {registrar_api_contact} contact
 			LEFT JOIN {registrar_api_user_handles} handles
 			ON (contact.cid = handles.cid)
 				LEFT JOIN {node} node
@@ -27,7 +27,7 @@ function registrar_api_handle_autocomplete($string = "") {
 		WHERE handles.uid = %d
 			AND LOWER(node.title) LIKE LOWER('%s%%')", $user->uid, $string);
 	while ($data = db_fetch_object($result)) {
-		$matches[$data->nid] = check_plain($data->title);
+		$matches[$data->title] = _registrar_api_format_contact_info($data);
 	}
 	drupal_json($matches);
 }

@@ -259,11 +259,33 @@ function registrar_api_domain_form(&$node, $form_state) {
 }
 
 /**
+ * Implementation of hook_validate().
+ *
+ * If a handle doesn't exist, show an error.
+ * A domain needs those three handles, otherwise we can't register them
+ */
+function registrar_api_domain_validate($node, &$form) {
+	// Check if the registrar handle exists
+	$result = db_query("SELECT COUNT(contact.cid) FROM {registrar_api_contact} contact LEFT JOIN {node} node on ( node.nid = contact.nid ) WHERE node.title='%s'", $form['registrar_handle']['#value']);
+	if (db_result($result) != 1) {
+		form_set_error('registrar_handle', t('Registrar handle does not exist'));
+	}
+	// Check if the administrative handle exists
+	$result = db_query("SELECT COUNT(contact.cid) FROM {registrar_api_contact} contact LEFT JOIN {node} node on ( node.nid = contact.nid ) WHERE node.title='%s'", $form['adm_handle']['#value']);
+	if (db_result($result) != 1) {
+		form_set_error('adm_handle', t('Administrative handle does not exist'));
+	}
+	// Check if the technical handle exists
+	$result = db_query("SELECT COUNT(contact.cid) FROM {registrar_api_contact} contact LEFT JOIN {node} node on ( node.nid = contact.nid ) WHERE node.title='%s'", $form['tech_handle']['#value']);
+	if (db_result($result) != 1) {
+		form_set_error('tech_handle', t('Technical handle does not exist'));
+	}
+}
+
+/**
  * Implementation of hook_insert().
  */
 function registrar_contact_insert($node) {
-	//stub	
-//	print_r($node);
 	$set_str = _registrar_api_get_set_str($node);
 	db_query("INSERT INTO {registrar_api_contact} SET $set_str",
 		$node->nid);
@@ -272,21 +294,36 @@ function registrar_contact_insert($node) {
 } 
 
 function registrar_api_domain_insert($node) {
-	db_query("INSERT INTO {registrar_api_domain} SET nid='%d', tld='%s', registrar_handle='%d', adm_handle='%d', tech_handle='%d'", $node->nid, $node->tld, $node->registrar_handle, $node->adm_handle, $node->tech_handle);
+	db_query("
+		INSERT INTO {registrar_api_domain} 
+			SET
+				nid='%d', 
+				tld='%s', 
+				registrar_handle=
+					(SELECT contact.cid FROM {registrar_api_contact} contact LEFT JOIN {node} node on ( node.nid = contact.nid ) WHERE node.title='%s'), 
+				adm_handle=
+					(SELECT contact.cid FROM {registrar_api_contact} contact LEFT JOIN {node} node on ( node.nid = contact.nid ) WHERE node.title='%s'), 
+				tech_handle=
+					(SELECT contact.cid FROM {registrar_api_contact} contact LEFT JOIN {node} node on ( node.nid = contact.nid ) WHERE node.title='%s')
+				", $node->nid, $node->tld, $node->registrar_handle, $node->adm_handle, $node->tech_handle);
 }
 
 /**
  * Implementation of hook_update().
  */
-function registrar_api_update($node) {
-	// TODO: module_invoke_all('update_contact', $node);
-
-	//print_r($node);
-	//stub
-}
-
 function registrar_api_domain_update($node) {
-	// TODO 
+	// TODO: module_invoke_all('update_contact', $node);
+	db_query("
+	UPDATE {registrar_api_domain} domain
+		SET 
+			registrar_handle=
+				(SELECT contact.cid FROM {registrar_api_contact} contact LEFT JOIN {node} node on ( node.nid = contact.nid ) WHERE node.title='%s'),
+			adm_handle=
+				(SELECT contact.cid FROM {registrar_api_contact} contact LEFT JOIN {node} node on ( node.nid = contact.nid ) WHERE node.title='%s'),
+			tech_handle=
+				(SELECT contact.cid FROM {registrar_api_contact} contact LEFT JOIN {node} node on ( node.nid = contact.nid ) WHERE node.title='%s')
+		WHERE domain.nid=%d;
+	", $node->registrar_handle, $node->adm_handle, $node->tech_handle, $node->nid);
 }
 
 /**
@@ -318,7 +355,23 @@ function registrar_contact_load($node) {
 }
 
 function registrar_api_domain_load($node) {
-	$domain_data = db_fetch_object(db_query("SELECT * FROM {registrar_api_domain} WHERE nid=%d", $node->nid));
+	// Fetch the names iso the id's for the handles
+	// Now we can autocomplete the names iso the id's
+	// @see registrar_api_domain_update
+	// @see registrar_api_domain_insert
+	$domain_data = db_fetch_object(db_query("
+	select  domain.nid, domain.tld,
+		tech_handle.title as tech_handle,
+		adm_handle.title as adm_handle,
+		registrar_handle.title as registrar_handle
+		from {registrar_api_domain} as domain
+			LEFT JOIN ( {registrar_api_contact} as domain_contact, {node} AS tech_handle)
+				on (domain.tech_handle = domain_contact.cid AND domain_contact.nid = tech_handle.nid)
+			LEFT JOIN ( {registrar_api_contact} as adm_contact, {node} AS adm_handle)
+				on (domain.adm_handle = adm_contact.cid AND adm_contact.nid = adm_handle.nid)
+			LEFT JOIN ( {registrar_api_contact} as registrar_contact, {node} AS registrar_handle)
+				on (domain.registrar_handle = registrar_contact.cid AND registrar_contact.nid = registrar_handle.nid)
+		WHERE domain.nid=%d", $node->nid));
 	return $domain_data;
 }
 
