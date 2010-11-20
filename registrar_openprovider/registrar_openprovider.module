@@ -83,7 +83,7 @@ function _registrar_openprovider_do_request($request) {
 }
 function _registrar_openprovider_new_request($request_name) {
   $request = new OP_Request;
-  $request->setCommand($request_name)
+  $request->setCommand($request_name);
 
   return $request;
 }
