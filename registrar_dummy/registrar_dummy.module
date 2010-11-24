@@ -38,3 +38,24 @@ function registrar_dummy_admin_form() {
 function registrar_dummy_create_handle($contact) {
   return 'AAA';
 }
+
+/**
+ * @see hook_check_domains()
+ * @param $domain_list
+ */
+function registrar_dummy_check_domains($domain_list) {
+  // Return some predefined answer.
+  return array(
+    'example.com' => array(
+      'Domain' => 'example.com',
+      'Available' => FALSE,
+    ),
+    'example-non-existant.com' => array(
+      'Domain' => 'example.com',
+      'Available' => TRUE,
+    ),
+    'drupal.org' => array(
+      'Domain' => 'drupal.org',
+      'Available' => FALSE,
+  ));
+}

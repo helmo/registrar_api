@@ -3,7 +3,8 @@
 
 /**
  * @file
- *   simpletest tests for the registrar API
+ *   Simpletest tests for the registrar API
+ *   This file does primarily provide some general code, registrar_dummy.test should implement actual tests of this API.
  */
 class RegistrarAPITestCase extends DrupalWebTestCase {
 
@@ -19,7 +20,7 @@ class RegistrarAPITestCase extends DrupalWebTestCase {
   }
 
   /**
-   * 
+   *
    */
   function setUp() {
     parent::setUp();
@@ -36,6 +37,15 @@ class RegistrarAPITestCase extends DrupalWebTestCase {
     return $domain;
   }
 
+
+  /**
+   * Define which registrar implementation is the default
+   * @param $registrar_module
+   */
+  function setDefaultRegistrar($registrar_module) {
+    variable_set('registrar_api_default_registrar', $registrar_module);
+  }
+
   function getContacts() {
     // Use the contact info setup by user 1 for now
     global $db_prefix;
@@ -46,5 +56,33 @@ class RegistrarAPITestCase extends DrupalWebTestCase {
     $contacts = registrar_api_get_user_contacts(1);
     $db_prefix = $tmp;
     return $contacts;
+  }
+}
+
+class RegistrarAPIUnitTestCase extends DrupalUnitTestCase {
+  function getInfo() {
+
+    return array(
+    'name' => t('Registrar API helper tests'),
+    'description' => t('Tests for the Registrar API helper code.'),
+    'group' => t('Registrar API'),
+    );
+  }
+
+  /**
+   * Test the workings of registrar_api_split_domain_name()
+   */
+  function testSplitDomainName() {
+    $tests = array(
+      'drupal.org' => array('drupal', 'org'),
+      'example.com' => array('example', 'com'),
+      'example-foo.com' => array('example-foo', 'com'),
+      'examplecom' => array(), // Missing dot
+    );
+
+    foreach ($tests as $test => $expected) {
+      $result = registrar_api_split_domain_name($test);
+      $this->assertEqual($result, $expected);
+    }
   }
 }

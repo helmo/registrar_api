@@ -25,7 +25,8 @@ function registrar_api_help($path, $arg) {
  * Implementation of hook_init().
  */
 function registrar_api_init() {
-	module_load_include('inc', 'registrar_api', 'registrar_api.node');
+  module_load_include('inc', 'registrar_api');
+  module_load_include('inc', 'registrar_api', 'registrar_api.node');
 }
 
 /**
@@ -144,6 +145,19 @@ function registrar_api_admin_form($arg) {
 function registrar_api_get_registars() {
 
   return module_invoke_all('get_registrar_info');
+}
+
+
+/**
+ * Split a domain name into it's TLD and name parts.
+ *  
+ * @param string $domain_name
+ */
+function registrar_api_split_domain_name($domain_name) {
+  $matches = array();
+  preg_match('/(.*)\.(.*)$/', $domain_name, $matches);
+  array_shift($matches);
+  return $matches;
 }
 
 /**** Pages ****/
@@ -490,4 +504,72 @@ function _registrar_api_country_codes() {
     'ZM' => t('Zambia'),
     'ZW' => t('Zimbabwe'),
   );
+}
+
+
+function _registrar_api_method() {
+  $args = func_get_args();
+  $method = array_shift($args);
+
+  $registrar = variable_get('registrar_api_default_registrar', '');
+  $method = $registrar . '_' . $method;
+
+  return call_user_func_array($method, $args);
+}
+
+/**
+ * Converts the keys in each contact array to it's CamelCase equivelant.
+ * i.e. first_name => FirstName
+ *
+ * This is the format that namecheap needs the data to be in.
+ */
+function _registrar_api_convert_contacts($registrant, $tech, $admin,
+  $auxbilling) {
+
+  // Convert the contact details' keys to CamelCase
+  $contact_copy = array(
+    'registrant' => array(), 'tech' => array(),
+    'admin' => array(), 'auxbilling' => array());
+
+  foreach ($contact_copy as $type => $values) {
+    foreach ($$type as $key => $value) {
+      $newkey = str_replace('_', ' ', $key);
+      $newkey = str_replace(' ', '', ucwords($newkey));
+      $contact_copy[$type][$newkey] = $value;
+    }
+  }
+
+  return $contact_copy;
+}
+
+function _registrar_api_convert_contacts_reverse(
+  $registrant, $tech, $admin, $aux_billing) {
+  // Convert the contact details' keys from CamelCase to lower with _'s
+  $field_map = array(
+    'OrganizationName' => 'organization_name',
+    'JobTitle' => 'job_title',
+    'FirstName' => 'first_name',
+    'LastName' => 'last_name',
+    'Address1' => 'address1',
+    'Address2' => 'address2',
+    'City' => 'city',
+    'StateProvince' => 'state_province',
+    'StateProvinceChoice' => 'state_province_choice',
+    'PostalCode' => 'postal_code',
+    'Country' => 'country',
+    'Phone' => 'phone',
+    'Fax' => 'fax',
+    'EmailAddress' => 'email_address',
+    'PhoneExt' => 'phone_ext'
+  );
+  $contact_copy = array('registrant' => array(), 'tech' => array(),
+                        'admin' => array(), 'aux_billing' => array());
+  foreach ($contact_copy as $type => $values) {
+    foreach ($$type as $key => $value) {
+      $newkey = $field_map[$key];
+      $contact_copy[$type][$newkey] = $value;
+    }
+  }
+
+  return $contact_copy;
 }

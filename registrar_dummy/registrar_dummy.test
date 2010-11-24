@@ -1,0 +1,74 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ *   simpletest tests for the registrar API
+ */
+class DummyRegistrarAPITestCase extends RegistrarAPITestCase {
+
+  /**
+   * Implementation of getInfo().
+   */
+  function getInfo() {
+    return array(
+      'name' => t('Dummy API tests'),
+      'description' => t('Test Dummy registrar API calls.'),
+      'group' => t('Registrar API'),
+    );
+  }
+
+  /**
+   * Set the namecheap api settings
+   */
+  function setUp() {
+    parent::setUp();
+
+    $this->setDefaultRegistrar('registrar_dummy');
+  }
+
+  /**
+   * Test registrar_api_check_domains().
+   */
+  function testCheckDomains() {
+    // Test an a registered name
+    $to_check = array('example.com', 'example-non-existant.com', 'drupal.org');
+    $actual = registrar_api_check_domains($to_check);
+    $desired = array(
+      'example.com' => array(
+        'Domain' => 'example.com',
+        'Available' => FALSE,
+      ),
+      'example-non-existant.com' => array(
+        'Domain' => 'example.com',
+        'Available' => TRUE,
+      ),
+      'drupal.org' => array(
+        'Domain' => 'drupal.org',
+        'Available' => FALSE,
+      ));
+
+    $this->assertEqual($actual, $desired, t('Testing check_domains on a registered domain name'));
+  }
+/*
+  function testAPICreateDomain() {
+    $domain = $this->randomDomainName();
+    $contacts = $this->getContacts();
+    $contacts = _registrar_api_convert_contacts($contacts['registrant'], $contacts['tech'], $contacts['admin'], $contacts['aux_billing']);
+
+    $actual = namecheap_create_domain($domain, 1, $contacts['registrant'], $contacts['tech'], $contacts['admin'], $contacts['auxbilling']);
+
+    $desired = array(
+      'Domain' => $domain,
+      'DomainID' => $actual['DomainID'],  // No way to guess some of these.
+      'Registered' => 'true',
+      'OrderId' => $actual['OrderID'],
+      'TransactionId' => $actual['TransactionID'],
+      'ChargedAmount' => $actual['ChargedAmount'],
+    );
+
+    $this->assertEqual($actual, $desired, t('Testing domain creation on %domain', array('%domain' => $domain)));
+  }
+
+ */
+}
