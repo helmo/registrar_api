@@ -24,20 +24,24 @@ class OP_API
     return $this;
   }
 
-  public function process (OP_Request $r)
+  private function doDebug ($data, $label = 'OP_API')
   {
     if ($this->debug) {
-      echo $r->getRaw() . "\n";
+      debug($data, $label, TRUE);
     }
+  }
+
+  public function process (OP_Request $r)
+  {
+    $this->doDebug($r->getRaw());
 
     $msg = $r->getRaw();
     $str = $this->_send($msg);
     if (!$str) {
       throw new OP_API_Exception ('Bad reply');
     }
-    if ($this->debug) {
-      echo $str . "\n";
-    }
+    $this->doDebug($str);
+
     return new OP_Reply($str);
   }
 
