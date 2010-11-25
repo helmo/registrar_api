@@ -6,7 +6,7 @@ function registrar_openprovider_get_registrar_info() {
     'registrar_openprovider' => array(
       'name' => 'OpenProvider',
       'description' => 'Openprovider domain registrar',
-    )
+  )
   );
 }
 
@@ -70,6 +70,28 @@ function registrar_openprovider_create_handle($contact) {
   return $handle;
 }
 
+function registrar_openprovider_check_domains($domain_names) {
+  registrar_openprovider_include();
+  $request = _registrar_openprovider_new_request('checkDomainRequest');
+
+  $args_data = array(
+    'domains' => array()
+  );
+
+  foreach ($domain_names as $domain) {
+    list($name, $tld) = registrar_api_split_domain_name($domain);
+    $args_data['domains'][] = array('name' => $name, 'extension' => $tld);
+  }
+
+  $request->setArgs($args_data);
+  $reply = _registrar_openprovider_do_request($request);
+  $results = array();
+  foreach ($reply->getValue() as $rep) {
+    $results[$rep['domain']] = array('Domain' => $rep['domain'], 'Available' => ($rep['status'] == 'free' ? TRUE : FALSE ));
+  }
+  return $results;
+}
+
 function _registrar_openprovider_do_request($request) {
   // Create a new API connection
   $api = new OP_API (variable_get('registrar_openprovider_uri', 'https://api.openprovider.eu/'));
@@ -77,7 +99,16 @@ function _registrar_openprovider_do_request($request) {
     'username' => variable_get('registrar_openprovider_api_user', ''), 
     'password' => variable_get('registrar_openprovider_api_password', ''),
   ));
-  $reply = $api->setDebug(1)->process($request);
+  $debug = FALSE;
+  if ($debug) {
+    $api->setDebug(1);
+    debug($request, 'OP request', TRUE);
+  }
+  $reply = $api->process($request);
+
+  if ($debug) {
+    debug($reply, 'OP reply', TRUE);
+  }
 
   return $reply;
 }
@@ -101,14 +132,14 @@ function _registrar_openprovider_node_to_args_data($contact_node) {
       'firstName' => $n->firstname, //'John',
       'prefix' => $n->nameprefix, //"",
       'lastName' => $n->lastname, //'Jones',
-    ),
+  ),
     'vat' => null,
     'gender' => $n->gender, //'M', 
     'phone' => array(
                 'countryCode'  => $n->phone_countrycode,
                 'areaCode' => $n->phone_areacode,
                 'subscriberNumber' => $n->phone_subscribernumber,
-            ),
+  ),
     'address' => array(
       'street' => $n->street, //'Main Avenue',
       'number' => $n->housenumber, //'2',
@@ -117,17 +148,17 @@ function _registrar_openprovider_node_to_args_data($contact_node) {
       'city' => $n->city, //'Rotterdam',
       'state' => $n->state,
       'country' => $n->country,
-    ),
+  ),
 
     'email' => $n->email, // 'not@existing.com',
-/*
-            'additionalData' => array(
-                'birthDate' => '1958-12-03',
-                'companyRegistrationCity' => 'London',
-                'companyRegistrationNumber' => '7723601',
-                'companyRegistrationSubscriptionDate' => '2003-09-12',
-            )
- */
+  /*
+  'additionalData' => array(
+  'birthDate' => '1958-12-03',
+  'companyRegistrationCity' => 'London',
+  'companyRegistrationNumber' => '7723601',
+  'companyRegistrationSubscriptionDate' => '2003-09-12',
+  )
+  */
   );
   return $args_data;
 }
