@@ -20,7 +20,7 @@
  *   )
  */
 function registrar_api_check_domains($domain_list) {
-  return _registrar_api_method('check_domains', implode(", ", $domain_list));
+  return _registrar_api_method('check_domains', $domain_list);
 }
 
 /**
