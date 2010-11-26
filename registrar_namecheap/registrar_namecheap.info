@@ -1,0 +1,7 @@
+; $Id$
+
+name = Registrar API implementation for Namecheap
+description = Connects to the registrar API of Namecheap
+package = RegistrarAPI
+depends = registrar_api
+core = 6.x
