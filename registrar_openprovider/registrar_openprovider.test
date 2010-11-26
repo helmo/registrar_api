@@ -2,8 +2,8 @@
 // $Id$
 
 define('OPENPROVIDER_TEST_URL', 'https://api.openprovider.eu');
-define('OPENPROVIDER_TEST_USER', '');
-define('OPENPROVIDER_TEST_KEY', '');
+define('OPENPROVIDER_TEST_USER', 'initfourtest');
+define('OPENPROVIDER_TEST_KEY', '3Ho28GTz');
 
 /**
  * @file
@@ -36,43 +36,7 @@ class OpenProviderRegistrarAPITestCase extends RegistrarAPITestCase {
     $this->setDefaultRegistrar('registrar_openprovider');
   }
   
-  /**
-   * Test domains_register
-   */
-  function testOpenProviderAPICheckDomains() {
-    // Test a registered name
-    $actual = registrar_api_check_domains(array('openprovider.eu', 'someveryfreedomain1sd83nms8.com'));
-    $desired = array(
-      'openprovider.eu' => array(
-        'Domain' => 'openprovider.eu',
-        'Available' => FALSE,
-      ),
-      'someveryfreedomain1sd83nms8.com' => array(
-        'Domain' => 'someveryfreedomain1sd83nms8.com',
-        'Available' => TRUE,
-        /*
-        'ErrorNo' => '',
-        'Description' => '',
-         */
-      )
-    );
 
-    $this->assertEqual($actual, $desired, t('Testing check_domains on a registered domain name'));
-/*
-    // Test on an available domain
-    $actual = registrar_api_check_domains('thisisnotregdyet.com');
-    $desired = array(
-      'thisisnotregdyet.com' => array(
-        'Domain' => 'thisisnotregdyet.com',
-        'Available' => 'true',
-        'ErrorNo' => '',
-        'Description' => '',
-      ),
-    );
-
-    $this->assertEqual($actual, $desired, t('Testing check_domains on an available domain name'));
-  */
-  }
 /*
   function testOpenProviderAPICreateDomain() {
     $domain = $this->randomDomainName();

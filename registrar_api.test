@@ -6,22 +6,12 @@
  *   Simpletest tests for the registrar API
  *   This file does primarily provide some general code, registrar_dummy.test should implement actual tests of this API.
  */
-class RegistrarAPITestCase extends DrupalWebTestCase {
 
-  /**
-   * Implementation of getInfo().
-   */
-  function getInfo() {
-    return array(
-      'name' => t('Registrar API tests'),
-      'description' => t('Registrar API functionality.'),
-      'group' => t('Registrar API'),
-    );
-  }
+/**
+ * Base class for Registrar API test cases
+ */
+abstract class RegistrarAPITestCase extends DrupalWebTestCase {
 
-  /**
-   *
-   */
   function setUp() {
     parent::setUp();
   }
@@ -30,6 +20,11 @@ class RegistrarAPITestCase extends DrupalWebTestCase {
     parent::tearDown();
   }
 
+  /**
+   * Generate a random domainname, hopefully not already registred.
+   * 
+   * @return string Generated domain name
+   */
   function randomDomainName() {
     $exts = array('.com', '.net', '.org');
     $ext = $exts[mt_rand(0, count($exts) - 1)];
@@ -37,6 +32,32 @@ class RegistrarAPITestCase extends DrupalWebTestCase {
     return $domain;
   }
 
+  
+  /**
+   * Test registrar_api_check_domains through the default registrar.
+   */
+  function testAPICheckDomains() {
+    $randomdomain = $this->randomDomainName(); 
+    // Test a registered name
+    $actual = registrar_api_check_domains(array('drupal.org', $randomdomain));
+    $desired = array(
+      'drupal.org' => array(
+        'Domain' => 'drupal.org',
+        'Available' => FALSE,
+    ),
+      $randomdomain => array(
+        'Domain' => $randomdomain,
+        'Available' => TRUE,
+    /*
+     'ErrorNo' => '',
+     'Description' => '',
+     */
+    )
+    );
+
+    $this->assertEqual($actual, $desired, t('Testing check_domains on a registered and free domain name'));
+  }
+  
 
   /**
    * Define which registrar implementation is the default
@@ -59,11 +80,28 @@ class RegistrarAPITestCase extends DrupalWebTestCase {
   }
 }
 
+
+class GeneralRegistrarAPITestCase extends RegistrarAPITestCase {
+  /**
+   * Implementation of getInfo().
+   */
+  function getInfo() {
+    return array(
+      'name' => t('General Registrar API tests'),
+      'description' => t('Registrar API functionality.'),
+      'group' => t('Registrar API'),
+    );
+  }
+
+  // @todo Test setting the default registrar via /admin/settings/registrar_api
+
+}
+
 class RegistrarAPIUnitTestCase extends DrupalUnitTestCase {
   function getInfo() {
 
     return array(
-    'name' => t('Registrar API helper tests'),
+    'name' => t('Registrar API Unit tests'),
     'description' => t('Tests for the Registrar API helper code.'),
     'group' => t('Registrar API'),
     );
