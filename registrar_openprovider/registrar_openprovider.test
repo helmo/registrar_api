@@ -1,9 +1,6 @@
 <?php
 // $Id$
 
-define('OPENPROVIDER_TEST_URL', 'https://api.openprovider.eu');
-define('OPENPROVIDER_TEST_USER', 'initfourtest');
-define('OPENPROVIDER_TEST_KEY', '3Ho28GTz');
 
 /**
  * @file
