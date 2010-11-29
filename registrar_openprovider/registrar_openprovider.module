@@ -92,6 +92,34 @@ function registrar_openprovider_check_domains($domain_names) {
   return $results;
 }
 
+/**
+ * Returns an array of domains.
+ *
+ * @see registrar_api_domains_getlist()
+ */
+function registrar_openprovider_domains_getlist() {
+
+  registrar_openprovider_include();
+  $request = _registrar_openprovider_new_request('searchDomainRequest');
+  $args_data = array();
+  $request->setArgs($args_data);
+  $reply = _registrar_openprovider_do_request($request);
+  $results = array();
+  $reply_data = $reply->getValue();
+  foreach ($reply_data['results'] as $item) {
+    $domain_name = $item['domain']['name'] . $item['domain']['extension'];
+    $domains[$domain_name] = array(
+      'ID' => $item['id'],
+      'Name' => $domain_name,
+      'User' => '', // not implemented
+      'Created' => $item['activeDate'],
+      'Expires' => $item['expirationDate'],
+      'IsExpired' => null, // not implemented
+    );
+  }
+  return $domains;
+}
+
 function _registrar_openprovider_do_request($request) {
   // Create a new API connection
   $api = new OP_API (variable_get('registrar_openprovider_uri', 'https://api.openprovider.eu/'));

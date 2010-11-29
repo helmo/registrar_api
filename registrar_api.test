@@ -44,6 +44,20 @@ abstract class RegistrarAPITestCase extends DrupalWebTestCase {
 
     $this->assertEqual($actual, $desired, t('Testing check_domains on a registered and free domain name'));
   }
+
+  /**
+   * Test registrar_api_domains_getlist through the default registrar.
+   */
+  function testAPIDomainsGetlist() {
+    // Test a registered name
+    $actual = registrar_api_domains_getlist();
+    $this->assertTrue(is_array($actual), t('registrar_api_domains_getlist returns an array'));
+
+    // Do some basic check on the returned array formatting.
+    foreach($actual as $key => $value) {
+      $this->assertEqual($key, $value['Name'], 'Name attribute equal to array key');
+    }
+  }
   
   /**** Helper fuctions ******/
   

@@ -59,3 +59,24 @@ function registrar_dummy_check_domains($domain_list) {
       'Available' => FALSE,
   ));
 }
+
+/**
+ * Returns an array of domains.
+ *
+ * @see registrar_api_domains_getlist()
+ */
+function registrar_dummy_domains_getlist() {
+
+  $domains = array(
+    'domaintest.com' => array(
+      'ID' => 1836,
+      'Name' => 'domaintest.com',
+      'User' => 'owner',
+      'Created' => '2009-03-24',
+      'Expires' => '2010-03-24',
+      'IsExpired' => FALSE,
+    )
+  );
+
+  return $domains;
+}

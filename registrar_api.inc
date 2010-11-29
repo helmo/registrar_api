@@ -41,6 +41,26 @@ function registrar_api_check_domain($domain) {
 }
 
 /**
+ * Returns an array of domains with the following structure:
+ *
+ * Array (
+ *   [domaintest.com] => Array (
+ *     [ID] => 1836
+ *     [Name] => domaintest.com
+ *     [User] => owner
+ *     [Created] => 03/24/2009
+ *     [Expires] => 03/24/2010
+ *     [IsExpired] => false
+ *   )
+ * )
+ * @todo integrate additional data?
+ * @todo add optional parameters: limit, search pattern?
+ */
+function registrar_api_domains_getlist() {
+  return _registrar_api_method('domains_getlist');
+}
+
+/**
  * Register the given domain name
  *
  * @param $domain_name

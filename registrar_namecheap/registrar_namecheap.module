@@ -181,21 +181,12 @@ function namecheap_get_contacts($domain_name) {
 }
 
 /**
- * Returns an array of domains with the following structure:
+ * Returns an array of domains.
  *
- * Array (
- *   [domaintest.com] => Array (
- *     [ID] => 1836
- *     [Name] => domain-name.com
- *     [User] => owner
- *     [Created] => 03/24/2009
- *     [Expires] => 03/24/2010
- *     [IsExpired] => false
- *   )
- * )
- *
+ * @todo change date format to iso?
+ * @see registrar_api_domains_getlist()
  */
-function namecheap_domains_getlist() {
+function registrar_namecheap_domains_getlist() {
   // TODO: Handle the case when there is no domains to list
 
   $request = _namecheap_init_request('namecheap.domains.getList');
