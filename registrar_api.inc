@@ -25,6 +25,7 @@ function registrar_api_check_domains($domain_list) {
 
 /**
  * Check the availability status on the specified domain.
+ * @uses registrar_api_check_domains()
  *
  * @param $domain
  *   The domain name to check availability on
